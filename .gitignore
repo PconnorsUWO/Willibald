@@ -1,4 +1,19 @@
-.idea/
-.vscode/
-build/
-.env
+# Project
+/.idea/
+/.vscode/
+/.env
+
+# Build
+/build/
+/CMakeCache.txt
+/CMakeFiles/
+
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+
+Makefile
+cmake_install.cmake
