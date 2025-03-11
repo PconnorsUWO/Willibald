@@ -2,11 +2,11 @@
 // Created by Alexander King Perocho on 2025-03-10.
 //
 
-#include "include/bitboard.h"
+#include "include/chessboard.h"
 
 int main()
 {
-  const Bitboard board;
-  board.Print();
+  const Chessboard board;
+  board.GetColorOccupancy(2).Print();
   return 0;
 }
