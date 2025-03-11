@@ -2,6 +2,7 @@
 /.idea/
 /.vscode/
 /.env
+/cmake-build-debug
 
 # Build
 /build/
