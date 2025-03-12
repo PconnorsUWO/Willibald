@@ -13,19 +13,19 @@ class Chessboard
 
 public:
     Chessboard();
-    Chessboard Copy();
-    Bitboard GetPieceOccupancy(const int piece) const;
-    Bitboard GetColorOccupancy(const int color) const;
-    int GetSideToMove() const;
-    int GetEnpassantSquare() const;
-    int GetCastlePrivelage() const;
+    [[nodiscard]] Chessboard Copy() const;
+    [[nodiscard]] Bitboard GetPieceOccupancy(int piece) const;
+    [[nodiscard]] Bitboard GetColorOccupancy(int color) const;
+    [[nodiscard]] int GetSideToMove() const;
+    [[nodiscard]] int GetEnpassantSquare() const;
+    [[nodiscard]] int GetCastlePrivilege() const;
 
 private:
     Bitboard piece_occupancies[12];
     Bitboard color_occupancies[3];
     Bitboard zobrist_hash;
     int enpassant_square;
-    int castle_privelage;
+    int castle_privilege;
     int side_to_move;
 };
 
