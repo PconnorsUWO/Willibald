@@ -15,6 +15,7 @@
 *.dll
 *.exe
 *.out
+*.csv
 
 Makefile
 cmake_install.cmake

@@ -20,10 +20,10 @@ int main()
     Log::PrintChessBoard(chess_board);
     Log::PrintMoves(chess_board, color);
     // Set up a default evaluation strategy using the symmetric evaluation.
-    Evaluate::Evaluator evaluator(Evaluate::Evaluator::symmetricEvaluation);
+    evaluate::Evaluator evaluator(evaluate::Evaluator::SymmetricEvaluation);
 
     // Run test on a CSV file (with header "FEN,Evaluation").
-    double mse = evaluator.runTest("chessData.csv");
+    double mse = evaluator.RunTest("chessData.csv");
     std::cout << "Mean Squared Error: " << mse << std::endl;
     
     // std::cout << "P: " << MoveGen::GetPawnMoves(chess_board, 0).size() << std::endl;
