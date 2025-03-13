@@ -8,6 +8,7 @@
 #include "../include/chess_board.hpp"
 #include "../include/controller.hpp"
 #include "../include/evaluate.hpp"
+#include "../include/test.hpp"
 
 int main()
 {
@@ -19,13 +20,7 @@ int main()
 
     Log::PrintChessBoard(chess_board);
     Log::PrintMoves(chess_board, color);
-    // Set up a default evaluation strategy using the symmetric evaluation.
-    evaluate::Evaluator evaluator(evaluate::Evaluator::SymmetricEvaluation);
 
-    // Run test on a CSV file (with header "FEN,Evaluation").
-    double mse = evaluator.RunTest("chessData.csv");
-    std::cout << "Mean Squared Error: " << mse << std::endl;
-    
     // std::cout << "P: " << MoveGen::GetPawnMoves(chess_board, 0).size() << std::endl;
     // std::cout << "p: " << MoveGen::GetPawnMoves(chess_board, 1).size() << std::endl;
 

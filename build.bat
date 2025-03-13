@@ -11,6 +11,4 @@ cmake -G Ninja ..
 REM Build the project
 cmake --build .
 
-REM Pause to see output
 cd ..
-pause
