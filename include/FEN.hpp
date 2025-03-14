@@ -11,4 +11,5 @@ namespace Fen
     const std::string CMK_POSITION = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
     const std::string FEN_1 = "r1bqkbnr/pppp1ppp/3n4/4N3/4P3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 1";
     const std::string FEN_2 = "r1b1kb1r/ppp2ppp/2p2n2/8/3qP3/5N2/PPPP1PPP/RNBQK2R b KQkq - 2 6";
+    const std::string FEN_3 = "r1b1kb1r/1p3ppp/p2qpn2/8/2B5/5N2/PPP2PPP/R1BQ1RK1 b kq - 0 1";
 }

@@ -8,7 +8,7 @@ ChessBoard::ChessBoard()
     castle_privelage = ChessEncoding::NO_CASTLE;
     side_to_move = 0;
 }
-ChessBoard ChessBoard::Copy() { return *this; };
+ChessBoard ChessBoard::Copy() const { return *this; };
 Bitboard ChessBoard::GetPieceOccupancy(int piece) const { return piece_occupancies[piece]; }
 Bitboard ChessBoard::GetColorOccupancy(int color) const { return color_occupancies[color]; }
 int ChessBoard::GetSideToMove() const { return side_to_move; }

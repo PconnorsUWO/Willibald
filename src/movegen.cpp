@@ -214,9 +214,9 @@ std::vector<Move> MoveGen::GetQueenMoves(ChessBoard chess_board, int color)
 
 std::vector<Move> MoveGen::GetMoves(ChessBoard chess_board, int color)
 {
+    std::vector<Move> knight_moves = GetKnightMoves(chess_board, color);
     std::vector<Move> moves = GetPawnMoves(chess_board, color);
     std::vector<Move> king_moves = GetKingMoves(chess_board, color);
-    std::vector<Move> knight_moves = GetKnightMoves(chess_board, color);
     std::vector<Move> bishop_moves = GetBishopMoves(chess_board, color);
     std::vector<Move> rook_moves = GetRookMoves(chess_board, color);
     std::vector<Move> queen_moves = GetQueenMoves(chess_board, color);

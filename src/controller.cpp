@@ -1,7 +1,7 @@
 #include "../include/controller.hpp"
+#include "../include/encodings.hpp"
 
 #include <algorithm>
-#include "../include/encodings.hpp"
 
 Controller::Controller(ChessBoard &chess_board) : chess_board(chess_board) {}
 void Controller::MakeMove(Move move, int color)
@@ -14,6 +14,7 @@ void Controller::MakeMove(Move move, int color)
     int is_double_pawn_push = move.Decode(Move::DoublePawnPushFlag);
     int is_castle = move.Decode(Move::CastleFlag);
     int is_enpassant = move.Decode(Move::EnpassantFlag);
+
     if (is_capture)
     {
         chess_board.color_occupancies[color].Clear(source_square);
@@ -24,9 +25,8 @@ void Controller::MakeMove(Move move, int color)
         if (is_enpassant && chess_board.enpassant_square != ChessEncoding::NO_SQUARE)
         {
             /*
-                I don't know if redundancy exists:
-                In case of enpassant: target_square === chess_board.enpassant_square.
-                Also: chess_board.enpassant_square is not the square holding the captured pawn, it's the capturing_pawns intended destination.
+                In the case of en passant, the target_square is the destination square
+                of the capturing pawn and not the square holding the captured pawn.
             */
             chess_board.piece_occupancies[captured_piece].Clear(color ? chess_board.enpassant_square - 8 : chess_board.enpassant_square + 8);
             chess_board.color_occupancies[!color].Clear(color ? chess_board.enpassant_square - 8 : chess_board.enpassant_square + 8);
@@ -41,6 +41,22 @@ void Controller::MakeMove(Move move, int color)
             }
             chess_board.color_occupancies[!color].Clear(target_square);
         }
+    }
+    else
+    {
+
+        chess_board.color_occupancies[color].Clear(source_square);
+        chess_board.piece_occupancies[piece].Clear(source_square);
+
+        if (promotion_piece != 0)
+        {
+            chess_board.piece_occupancies[promotion_piece].Set(target_square);
+        }
+        else
+        {
+            chess_board.piece_occupancies[piece].Set(target_square);
+        }
+        chess_board.color_occupancies[color].Set(target_square);
     }
 }
 

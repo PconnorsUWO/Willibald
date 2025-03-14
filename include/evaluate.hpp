@@ -12,7 +12,6 @@ public:
     void SetEvaluator(EvalFunc new_evaluator);
     double Evaluate(const ChessBoard& board) const;
     static double SymmetricEvaluation(const ChessBoard& board);
-    static double NormalizeEvaluation(double score);
 
 private:
     EvalFunc evaluator_;

@@ -33,18 +33,25 @@ Bitboard AttackMask::GetAttackMask(Mask mask, int square)
 
 Bitboard AttackMask::GetAttackMask(Mask mask, int square, Bitboard occupancy)
 {
+    uint64_t index;
     switch (mask)
     {
     case Bishop:
         occupancy &= raw_bishop_masks[square];
         occupancy *= Magic::BISHOP_MAGIC_NUMBERS[square];
         occupancy >>= 64 - Magic::BISHOP_ATTACK_COUNT_MASK[square];
-        return bishop_masks[square][occupancy];
+        index = static_cast<uint64_t>(occupancy);
+        if (index >= 4096) // Prevent out-of-bounds access
+            return 0ULL;
+        return bishop_masks[square][index];
     case Rook:
         occupancy &= raw_rook_masks[square];
         occupancy *= Magic::ROOK_MAGIC_NUMBERS[square];
         occupancy >>= 64 - Magic::ROOK_ATTACK_COUNT_MASK[square];
-        return rook_masks[square][occupancy];
+        index = static_cast<uint64_t>(occupancy);
+        if (index >= 4096) // Prevent out-of-bounds access
+            return 0ULL;
+        return rook_masks[square][index];
     case Queen:
         return GetAttackMask(Bishop, square, occupancy) | GetAttackMask(Rook, square, occupancy);
     default:
@@ -102,7 +109,7 @@ void AttackMask::InitializeMask(Mask mask, int square)
         // if (bitboard << 9 & NOT_A_FILE)
         //     attack_mask |= bitboard << 9;
         // if (bitboard >> 7 & NOT_H_FILE)
-        //     attack_mask |= bitboard << 7;
+        //     attack_mask |= bitboard >> 7;
         // pawn_masks[1][square] = attack_mask;
         pawn_masks[1][square] |=
             ((1ULL << (square + 9)) & NOT_A_FILE) |

@@ -9,7 +9,7 @@ class ChessBoard
 
 public:
     ChessBoard();
-    ChessBoard Copy();
+    ChessBoard Copy() const;
     Bitboard GetPieceOccupancy(const int piece) const;
     Bitboard GetColorOccupancy(const int color) const;
     int GetSideToMove() const;
