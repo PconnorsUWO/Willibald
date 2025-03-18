@@ -1,5 +1,4 @@
-#ifndef TEST_HPP_
-#define TEST_HPP_
+#pragma once
 
 class Test {
     public:
@@ -9,5 +8,3 @@ class Test {
        static void RunMoveTests();
        static void RunMoveGenTests(); 
    };
-   
-#endif  // TEST_HPP_
