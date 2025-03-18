@@ -1,11 +1,14 @@
+//
+// Created by Alexander King Perocho on 2025-03-18.
+//
 #include <iostream>
-#include "../include/encodings.hpp"
-#include "../include/logging.hpp"
-#include "../include/movegen.hpp"
+#include "../include/chess.h"
+#include "../include/logging.h"
+#include "../include/movegen.h"
 
-void Log::PrintBitboard(Bitboard bitboard) { bitboard.Print(); }
+void Log::PrintBitboard(const Bitboard bitboard) { bitboard.Print(); }
 
-void Log::PrintPieceOccupancy(ChessBoard chess_board, int piece)
+void Log::PrintPieceOccupancy(const Chessboard& chessboard, int piece)
 {
     for (int rank = 0; rank < 8; rank++)
     {
@@ -13,16 +16,16 @@ void Log::PrintPieceOccupancy(ChessBoard chess_board, int piece)
         for (int file = 0; file < 8; file++)
         {
             int square = rank * 8 + file;
-            std::cout << (chess_board.GetPieceOccupancy(piece).Test(square) ? ChessEncoding::ASCII_PIECES[piece] : '.')
-                      << ' ';
+            std::cout << (chessboard.GetPieceOccupancy(piece).Test(square) ? Chess::ASCII_PIECES[piece] : '.')
+                << ' ';
         }
         std::cout << ('\n');
     }
     std::cout << "\n    a b c d e f g h\n";
-    std::cout << "\n decimal value = " << std::dec << chess_board.GetPieceOccupancy(piece) << '\n';
+    std::cout << "\n decimal value = " << std::dec << chessboard.GetPieceOccupancy(piece) << '\n';
 }
 
-void Log::PrintChessBoard(ChessBoard chess_board)
+void Log::PrintChessboard(Chessboard chessboard)
 {
     for (int rank = 0; rank < 8; rank++)
     {
@@ -31,28 +34,28 @@ void Log::PrintChessBoard(ChessBoard chess_board)
         {
             int square = rank * 8 + file;
             char ascii = -1;
-            for (int piece = ChessEncoding::P; piece <= ChessEncoding::k; piece++)
+            for (int piece = Chess::P; piece <= Chess::k; piece++)
             {
-                if (chess_board.GetPieceOccupancy(piece).Test(square))
-                    ascii = ChessEncoding::ASCII_PIECES[piece];
+                if (chessboard.GetPieceOccupancy(piece).Test(square))
+                    ascii = Chess::ASCII_PIECES[piece];
             }
             std::cout << (ascii < 0 ? '.' : ascii) << ' ';
         }
         std::cout << ('\n');
     }
     std::cout << "\n    a b c d e f g h\n";
-    std::cout << "\n    side:       " << (chess_board.GetSideToMove() ? "black" : "white");
-    int eps = chess_board.GetEnpassantSquare();
-    std::cout << "\n    enpassant:  " << (eps < 64 ? ChessEncoding::SQUARE_TO_ALGEBRAIC_NOTATION[eps] : "No Square");
+    std::cout << "\n    side:       " << (chessboard.GetSideToMove() ? "black" : "white");
+    int eps = chessboard.GetEnpassantSquare();
+    std::cout << "\n    enpassant:  " << (eps < 64 ? Chess::SQUARE_TO_ALGEBRAIC_NOTATION[eps] : "No Square");
     std::cout << "\n    castle:     "
-              << (chess_board.GetCastlePrivelage() & ChessEncoding::wk ? "K" : "-")
-              << (chess_board.GetCastlePrivelage() & ChessEncoding::wq ? "Q" : "-")
-              << (chess_board.GetCastlePrivelage() & ChessEncoding::bk ? "k" : "-")
-              << (chess_board.GetCastlePrivelage() & ChessEncoding::bq ? "q" : "-")
-              << "\n\n";
+        << (chessboard.GetCastlePrivilege() & Chess::wk ? "K" : "-")
+        << (chessboard.GetCastlePrivilege() & Chess::wq ? "Q" : "-")
+        << (chessboard.GetCastlePrivilege() & Chess::bk ? "k" : "-")
+        << (chessboard.GetCastlePrivilege() & Chess::bq ? "q" : "-")
+        << "\n\n";
 }
 
-void Log::PrintAttackedSquares(ChessBoard chess_board, int color)
+void Log::PrintAttackedSquares(const Chessboard& chessboard, const int color)
 {
     for (int rank = 0; rank < 8; rank++)
     {
@@ -60,7 +63,7 @@ void Log::PrintAttackedSquares(ChessBoard chess_board, int color)
         for (int file = 0; file < 8; file++)
         {
             int square = rank * 8 + file;
-            std::cout << (MoveGen::IsAttacked(chess_board, square, color) ? 'x' : '.') << ' ';
+            std::cout << (MoveGen::IsAttacked(chessboard, square, color) ? 'x' : '.') << ' ';
         }
         std::cout << ('\n');
     }
@@ -68,9 +71,9 @@ void Log::PrintAttackedSquares(ChessBoard chess_board, int color)
     std::cout << "\n    attacks from: " << (color ? "black" : "white\n");
 };
 
-void Log::PrintMoves(ChessBoard chess_board, int color)
+void Log::PrintMoves(const Chessboard& chessboard, const int color)
 {
-    std::vector<Move> moves = MoveGen::GetMoves(chess_board, color);
+    const std::vector<Move> moves = MoveGen::GetMoves(chessboard, color);
     for (int rank = 0; rank < 8; rank++)
     {
         std::cout << 8 - rank << "   ";
@@ -78,9 +81,9 @@ void Log::PrintMoves(ChessBoard chess_board, int color)
         {
             int square = rank * 8 + file;
             int target_square = -1;
-            for (int i = 0; i < moves.size(); i++)
+            for (const auto & move : moves)
             {
-                target_square = moves[i].Decode(Move::TargetSquare);
+                target_square = move.Decode(Move::TargetSquare);
                 if (square == target_square)
                     break;
                 target_square = -1;
@@ -104,32 +107,32 @@ void Log::PrintMoveEncoding(Move move)
     int is_castle = move.Decode(Move::CastleFlag);
     int is_enpassant = move.Decode(Move::EnpassantFlag);
 
-    std::cout << ChessEncoding::ASCII_PIECES[piece]
-              << ' '
-              << ChessEncoding::SQUARE_TO_ALGEBRAIC_NOTATION[source_square]
-              << ' '
-              << ChessEncoding::SQUARE_TO_ALGEBRAIC_NOTATION[target_square]
-              << "\nPromote: "
-              << promotion_piece
-              << "\nCapture: "
-              << (is_capture ? "Yes" : "No")
-              << "\nDPP: "
-              << (is_double_pawn_push ? "Yes" : "No")
-              << "\nCastle: "
-              << (is_castle ? "Yes" : "No")
-              << "\nEnpassant: "
-              << (is_enpassant ? "Yes" : "No")
-              << "\n\n";
+    std::cout << Chess::ASCII_PIECES[piece]
+        << ' '
+        << Chess::SQUARE_TO_ALGEBRAIC_NOTATION[source_square]
+        << ' '
+        << Chess::SQUARE_TO_ALGEBRAIC_NOTATION[target_square]
+        << "\nPromote: "
+        << promotion_piece
+        << "\nCapture: "
+        << (is_capture ? "Yes" : "No")
+        << "\nDPP: "
+        << (is_double_pawn_push ? "Yes" : "No")
+        << "\nCastle: "
+        << (is_castle ? "Yes" : "No")
+        << "\nEnpassant: "
+        << (is_enpassant ? "Yes" : "No")
+        << "\n\n";
 };
 
-void Log::PrintMovesEncoding(std::vector<Move> moves)
+void Log::PrintMovesEncoding(const std::vector<Move>& moves)
 {
     for (int i = 0; i < moves.size(); i++)
     {
-        Move move = moves[i];
+        const Move move = moves[i];
         std::cout << "\n\nMove: "
-                  << i
-                  << '\n';
+            << i
+            << '\n';
         PrintMoveEncoding(move);
     }
 };

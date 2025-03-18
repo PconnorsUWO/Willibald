@@ -1,9 +1,22 @@
-#include "../include/bitboard.hpp"
+//
+// Created by Alexander King Perocho on 2025-03-10.
+//
+
+#include "../include/bitboard.h"
 #include <iostream>
 
-Bitboard::Bitboard() : value(0ULL) {}
-Bitboard::Bitboard(uint64_t ull) : value(ull) {}
-Bitboard::BitProxy::BitProxy(Bitboard &bitboard, int square) : bitboard(bitboard), square(square) {}
+Bitboard::Bitboard() : value(0ULL)
+{
+}
+
+Bitboard::Bitboard(const uint64_t ull) : value(ull)
+{
+}
+
+Bitboard::BitProxy::BitProxy(Bitboard& bitboard, int square) : bitboard(bitboard), square(square)
+{
+}
+
 void Bitboard::Print() const
 {
     for (int rank = 0; rank < 8; rank++)

@@ -8,6 +8,7 @@
 /build/
 /CMakeCache.txt
 /CMakeFiles/
+/cmake-build-debug/
 
 *.o
 *.obj

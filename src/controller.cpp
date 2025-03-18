@@ -1,10 +1,16 @@
-#include "../include/controller.hpp"
-#include "../include/encodings.hpp"
+//
+// Created by Alexander King Perocho on 2025-03-18.
+//
+#include "../include/controller.h"
 
 #include <algorithm>
+#include "../include/chess.h"
 
-Controller::Controller(ChessBoard &chess_board) : chess_board(chess_board) {}
-void Controller::MakeMove(Move move, int color)
+Controller::Controller(Chessboard& chessboard) : chessboard(chessboard)
+{
+}
+
+void Controller::MakeMove(const Move& move, const int color) const
 {
     int source_square = move.Decode(Move::SourceSquare);
     int target_square = move.Decode(Move::TargetSquare);
@@ -14,59 +20,46 @@ void Controller::MakeMove(Move move, int color)
     int is_double_pawn_push = move.Decode(Move::DoublePawnPushFlag);
     int is_castle = move.Decode(Move::CastleFlag);
     int is_enpassant = move.Decode(Move::EnpassantFlag);
-
     if (is_capture)
     {
-        chess_board.color_occupancies[color].Clear(source_square);
-        chess_board.piece_occupancies[piece].Clear(source_square);
-        chess_board.color_occupancies[color].Set(target_square);
-        chess_board.piece_occupancies[piece].Set(target_square);
-        int captured_piece = color ? ChessEncoding::P : ChessEncoding::p;
-        if (is_enpassant && chess_board.enpassant_square != ChessEncoding::NO_SQUARE)
+        chessboard.color_occupancies[color].Clear(source_square);
+        chessboard.piece_occupancies[piece].Clear(source_square);
+        chessboard.color_occupancies[color].Set(target_square);
+        chessboard.piece_occupancies[piece].Set(target_square);
+        int captured_piece = color ? Chess::P : Chess::p;
+        if (is_enpassant && chessboard.enpassant_square != Chess::NO_SQUARE)
         {
             /*
-                In the case of en passant, the target_square is the destination square
-                of the capturing pawn and not the square holding the captured pawn.
+                I don't know if redundancy exists:
+                In case of enpassant: target_square === chessboard.enpassant_square.
+                Also: chessboard.enpassant_square is not the square holding the captured pawn, it's the capturing_pawns intended destination.
             */
-            chess_board.piece_occupancies[captured_piece].Clear(color ? chess_board.enpassant_square - 8 : chess_board.enpassant_square + 8);
-            chess_board.color_occupancies[!color].Clear(color ? chess_board.enpassant_square - 8 : chess_board.enpassant_square + 8);
+            chessboard.piece_occupancies[captured_piece].Clear(
+                color ? chessboard.enpassant_square - 8 : chessboard.enpassant_square + 8);
+            chessboard.color_occupancies[!color].Clear(
+                color ? chessboard.enpassant_square - 8 : chessboard.enpassant_square + 8);
         }
         else
         {
             int last_piece = captured_piece + 6;
             while (captured_piece < last_piece)
             {
-                chess_board.piece_occupancies[captured_piece].Clear(target_square);
+                chessboard.piece_occupancies[captured_piece].Clear(target_square);
                 captured_piece++;
             }
-            chess_board.color_occupancies[!color].Clear(target_square);
+            chessboard.color_occupancies[!color].Clear(target_square);
         }
-    }
-    else
-    {
-
-        chess_board.color_occupancies[color].Clear(source_square);
-        chess_board.piece_occupancies[piece].Clear(source_square);
-
-        if (promotion_piece != 0)
-        {
-            chess_board.piece_occupancies[promotion_piece].Set(target_square);
-        }
-        else
-        {
-            chess_board.piece_occupancies[piece].Set(target_square);
-        }
-        chess_board.color_occupancies[color].Set(target_square);
     }
 }
 
-void Controller::ParseFen(std::string fen)
+void Controller::ParseFen(const std::string& fen) const
 {
-    std::fill(std::begin(chess_board.piece_occupancies), std::end(chess_board.piece_occupancies), 0ULL);
-    std::fill(std::begin(chess_board.color_occupancies), std::end(chess_board.color_occupancies), 0ULL);
-    chess_board.side_to_move = ChessEncoding::WHITE;
-    chess_board.enpassant_square = ChessEncoding::NO_SQUARE;
-    chess_board.castle_privelage = ChessEncoding::NO_CASTLE;
+    std::fill(std::begin(chessboard.piece_occupancies), std::end(chessboard.piece_occupancies), 0ULL);
+    std::fill(std::begin(chessboard.color_occupancies), std::end(chessboard.color_occupancies), 0ULL);
+    chessboard.side_to_move = Chess::WHITE;
+    chessboard.enpassant_square = Chess::NO_SQUARE;
+    chessboard.castle_privilege = Chess::NO_CASTLE;
+
     int i = 0;
     for (int rank = 0; rank < 8; rank++)
     {
@@ -75,17 +68,17 @@ void Controller::ParseFen(std::string fen)
             int square = rank * 8 + file;
             if ((fen[i] >= 'a' && fen[i] <= 'z') || (fen[i] >= 'A' && fen[i] <= 'Z'))
             {
-                int piece = ChessEncoding::ASCII_INT[fen[i]];
-                chess_board.piece_occupancies[piece].Set(square);
+                int piece = Chess::ASCII_INT[fen[i]];
+                chessboard.piece_occupancies[piece].Set(square);
                 i++;
             }
             if (fen[i] >= '0' && fen[i] <= '9')
             {
                 int offset = fen[i] - '0';
                 int piece = -1;
-                for (int bb_piece = ChessEncoding::P; bb_piece <= ChessEncoding::k; bb_piece++)
+                for (int bb_piece = Chess::P; bb_piece <= Chess::k; bb_piece++)
                 {
-                    if (chess_board.piece_occupancies[bb_piece].Test(square))
+                    if (chessboard.piece_occupancies[bb_piece].Test(square))
                         piece = bb_piece;
                 }
                 if (piece == -1)
@@ -98,26 +91,28 @@ void Controller::ParseFen(std::string fen)
         }
     }
     i++;
-    chess_board.side_to_move = fen[i] == 'w' ? ChessEncoding::WHITE : ChessEncoding::BLACK;
+    chessboard.side_to_move = fen[i] == 'w' ? Chess::WHITE : Chess::BLACK;
     i += 2;
     while (fen[i] != ' ')
     {
         switch (fen[i])
         {
         case 'K':
-            chess_board.castle_privelage |= ChessEncoding::wk;
+            chessboard.castle_privilege |= Chess::wk;
             break;
         case 'Q':
-            chess_board.castle_privelage |= ChessEncoding::wq;
+            chessboard.castle_privilege |= Chess::wq;
             break;
         case 'k':
-            chess_board.castle_privelage |= ChessEncoding::bk;
+            chessboard.castle_privilege |= Chess::bk;
             break;
         case 'q':
-            chess_board.castle_privelage |= ChessEncoding::bq;
+            chessboard.castle_privilege |= Chess::bq;
             break;
         case '-':
-            chess_board.castle_privelage |= ChessEncoding::NO_CASTLE;
+            chessboard.castle_privilege |= Chess::NO_CASTLE;
+            break;
+        default:
             break;
         }
         i++;
@@ -127,16 +122,17 @@ void Controller::ParseFen(std::string fen)
     {
         int file = fen[i] - 'a';
         int rank = 8 - (fen[i + 1] - '0');
-        chess_board.enpassant_square = rank * 8 + file;
+        chessboard.enpassant_square = rank * 8 + file;
     }
     else
-        chess_board.enpassant_square = ChessEncoding::NO_SQUARE;
-    for (int piece = ChessEncoding::P; piece <= ChessEncoding::K; piece++)
-        chess_board.color_occupancies[ChessEncoding::WHITE] |= chess_board.piece_occupancies[piece];
-    for (int piece = ChessEncoding::p; piece <= ChessEncoding::k; piece++)
-        chess_board.color_occupancies[ChessEncoding::BLACK] |= chess_board.piece_occupancies[piece];
-    chess_board.color_occupancies[ChessEncoding::BOTH] |= chess_board.color_occupancies[ChessEncoding::WHITE];
-    chess_board.color_occupancies[ChessEncoding::BOTH] |= chess_board.color_occupancies[ChessEncoding::BLACK];
+        chessboard.enpassant_square = Chess::NO_SQUARE;
+    for (int piece = Chess::P; piece <= Chess::K; piece++)
+        chessboard.color_occupancies[Chess::WHITE] |= chessboard.piece_occupancies[piece];
+    for (int piece = Chess::p; piece <= Chess::k; piece++)
+        chessboard.color_occupancies[Chess::BLACK] |= chessboard.piece_occupancies[piece];
+    chessboard.color_occupancies[Chess::BOTH] |= chessboard.color_occupancies[Chess::WHITE];
+    chessboard.color_occupancies[Chess::BOTH] |= chessboard.color_occupancies[Chess::BLACK];
 }
 
+// TODO: implement
 bool Controller::IsLegalPosition(Bitboard occupancy) const { return false; }
