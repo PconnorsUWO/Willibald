@@ -2,9 +2,7 @@
 
 ## Building & Running:
 ```shell
-mkdir build
-cd build
-cmake ..
-cmake --build .
-./app  # Run the program
+cmake -B build
+cmake --build build
+build/./app  # Run the program
 ```

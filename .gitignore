@@ -2,6 +2,7 @@
 /.idea/
 /.vscode/
 /.env
+/cmake-build-debug
 
 # Build
 /build/
@@ -15,6 +16,7 @@
 *.dll
 *.exe
 *.out
+*.csv
 
 Makefile
 cmake_install.cmake
