@@ -15,7 +15,7 @@ Bitboard AttackMask::rook_masks[64][4096];
 Bitboard AttackMask::queen_masks[64][4096];
 Bitboard AttackMask::bishop_masks[64][4096];
 
-Bitboard AttackMask::GetAttackMask(Mask mask, int square)
+Bitboard AttackMask::GetAttackMask(const Mask mask, const int square)
 {
     switch (mask)
     {
@@ -66,7 +66,7 @@ Bitboard AttackMask::GetAttackMask(const Mask mask, const int square, Bitboard o
     }
 }
 
-Bitboard AttackMask::GetMaskedOccupancy(int occupancy_index, Bitboard attack_mask)
+Bitboard AttackMask::GetMaskedOccupancy(const int occupancy_index, Bitboard attack_mask)
 {
     Bitboard occupancy;
     int num_attacks = attack_mask.CountBits();
@@ -81,7 +81,7 @@ Bitboard AttackMask::GetMaskedOccupancy(int occupancy_index, Bitboard attack_mas
 
 
 //TODO: Implement
-void AttackMask::InitializeSlideMask(const Mask mask, int const square)
+void AttackMask::InitializeSlideMask(const Mask mask, const int square)
 {
     switch (mask)
     {
@@ -313,5 +313,5 @@ void AttackMask::initialize()
 {
     for (int mask = WhitePawn; mask <= King; mask++)
         for (int square = 0; square < 64; square++)
-            InitializeMask((Mask)mask, square);
+            InitializeMask(static_cast<Mask>(mask), square);
 }

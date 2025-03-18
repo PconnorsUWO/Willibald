@@ -1,10 +1,7 @@
 //
 // Created by Alexander King Perocho on 2025-03-10.
 //
-
-#ifndef BITBOARD_H
-#define BITBOARD_H
-
+#pragma once
 #include <cstdint>
 
 class Bitboard
@@ -122,5 +119,3 @@ private:
     uint64_t value;
     friend class BitProxy;
 };
-
-#endif //BITBOARD_H

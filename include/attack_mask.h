@@ -1,10 +1,7 @@
 //
 // Created by Alexander King Perocho on 2025-03-10.
 //
-
-#ifndef ATTACK_MASK_H
-#define ATTACK_MASK_H
-
+#pragma once
 #include "bitboard.h"
 
 class AttackMask
@@ -28,10 +25,10 @@ public:
     static void initialize();
 
 private:
-    static inline const Bitboard NOT_A_FILE = Bitboard(18374403900871474942ULL);
-    static inline const Bitboard NOT_H_FILE = Bitboard(9187201950435737471ULL);
-    static inline const Bitboard NOT_HG_FILE = Bitboard(4557430888798830399ULL);
-    static inline const Bitboard NOT_AB_FILE = Bitboard(18229723555195321596ULL);
+    static inline const Bitboard NOT_A_FILE = 18374403900871474942ULL;
+    static inline const Bitboard NOT_H_FILE = 9187201950435737471ULL;
+    static inline const Bitboard NOT_HG_FILE = 4557430888798830399ULL;
+    static inline const Bitboard NOT_AB_FILE = 18229723555195321596ULL;
 
     static Bitboard pawn_masks[2][64];
     static Bitboard knight_masks[64];
@@ -46,5 +43,3 @@ private:
     static Bitboard GetMaskedOccupancy(int occupancy_index, Bitboard attack_mask);
     AttackMask();
 };
-
-#endif //ATTACK_MASK_H

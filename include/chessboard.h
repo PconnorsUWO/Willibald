@@ -1,10 +1,7 @@
 //
 // Created by Alexander King Perocho on 2025-03-10.
 //
-
-#ifndef CHESSBOARD_H
-#define CHESSBOARD_H
-
+#pragma once
 #include "bitboard.h"
 
 class Chessboard
@@ -28,5 +25,3 @@ private:
     int castle_privilege;
     int side_to_move;
 };
-
-#endif //CHESSBOARD_H

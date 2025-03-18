@@ -1,10 +1,7 @@
 //
 // Created by Alexander King Perocho on 2025-03-10.
 //
-
-#ifndef CHESS_H
-#define CHESS_H
-
+#pragma once
 #include <string>
 
 namespace Chess
@@ -152,5 +149,3 @@ namespace Chess
         "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
     };
 }
-
-#endif //CHESS_H
