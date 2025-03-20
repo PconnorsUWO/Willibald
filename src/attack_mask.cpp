@@ -5,7 +5,8 @@
 
 #include "../include/attack_mask.h"
 #include "../include/magic.h"
-
+#include "../include/logging.h"
+#include <iostream>
 Bitboard AttackMask::king_masks[64];
 Bitboard AttackMask::pawn_masks[2][64];
 Bitboard AttackMask::knight_masks[64];
@@ -46,7 +47,11 @@ Bitboard AttackMask::GetAttackMask(const Mask mask, const int square, Bitboard o
             occupancy &= raw_bishop_masks[square];
             occupancy *= Magic::BISHOP_MAGIC_NUMBERS[square];
             occupancy >>= 64 - Magic::BISHOP_ATTACK_COUNT_MASK[square];
+            if (occupancy >= 4096) // Prevent out-of-bounds access
+                return 0ULL;
             return bishop_masks[square][occupancy];
+
+
         }
     case Rook:
         {
@@ -54,6 +59,8 @@ Bitboard AttackMask::GetAttackMask(const Mask mask, const int square, Bitboard o
             occupancy &= raw_rook_masks[square];
             occupancy *= Magic::ROOK_MAGIC_NUMBERS[square];
             occupancy >>= 64 - Magic::ROOK_ATTACK_COUNT_MASK[square];
+            if (occupancy >= 4096) // Prevent out-of-bounds access
+                return 0ULL;
             return rook_masks[square][occupancy];
         }
     case Queen:
@@ -144,19 +151,19 @@ void AttackMask::InitializeMask(const Mask mask, const int square)
     case RawBishop:
         {
             for (rank = target_rank + 1, file = target_file + 1;
-                 rank < 8 - 1 && file < 8 - 1;
+                 rank < 8 && file < 8;                           // Changed bounds
                  rank++, file++)
                 attack_mask |= (1ULL << (rank * 8 + file));
             for (rank = target_rank - 1, file = target_file + 1;
-                 rank > 0 && file < 8 - 1;
+                 rank >= 0 && file < 8;                         // Changed bounds
                  rank--, file++)
                 attack_mask |= (1ULL << (rank * 8 + file));
             for (rank = target_rank + 1, file = target_file - 1;
-                 rank < 8 - 1 && file > 0;
+                 rank < 8 && file >= 0;                         // Changed bounds
                  rank++, file--)
                 attack_mask |= (1ULL << (rank * 8 + file));
             for (rank = target_rank - 1, file = target_file - 1;
-                 rank > 0 && file > 0;
+                 rank >= 0 && file >= 0;                        // Changed bounds
                  rank--, file--)
                 attack_mask |= (1ULL << (rank * 8 + file));
             raw_bishop_masks[square] = attack_mask;
@@ -164,13 +171,13 @@ void AttackMask::InitializeMask(const Mask mask, const int square)
         }
     case RawRook:
         {
-            for (rank = target_rank + 1; rank < 8 - 1; rank++)
+            for (rank = target_rank + 1; rank < 8; rank++)      // Changed to include rank 7
                 attack_mask |= (1ULL << (rank * 8 + target_file));
-            for (rank = target_rank - 1; rank > 0; rank--)
+            for (rank = target_rank - 1; rank >= 0; rank--)     // Changed to include rank 0
                 attack_mask |= (1ULL << (rank * 8 + target_file));
-            for (file = target_file + 1; file < 8 - 1; file++)
+            for (file = target_file + 1; file < 8; file++)      // Changed to include file 7
                 attack_mask |= (1ULL << (target_rank * 8 + file));
-            for (file = target_file - 1; file > 0; file--)
+            for (file = target_file - 1; file >= 0; file--)     // Changed to include file 0
                 attack_mask |= (1ULL << (target_rank * 8 + file));
             raw_rook_masks[square] = attack_mask;
             return;
@@ -193,78 +200,101 @@ void AttackMask::InitializeMask(const Mask mask, const int square)
                      rank < 8 && file < 8;
                      rank++, file++)
                 {
-                    attack_mask |= (1ULL << (rank * 8 + file));
-                    if ((1ULL << (rank * 8 + file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (rank * 8 + file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+
                 for (rank = target_rank + 1, file = target_file - 1;
                      rank < 8 && file >= 0;
                      rank++, file--)
                 {
-                    attack_mask |= (1ULL << (rank * 8 + file));
-                    if ((1ULL << (rank * 8 + file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (rank * 8 + file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+
                 for (rank = target_rank - 1, file = target_file + 1;
                      rank >= 0 && file < 8;
                      rank--, file++)
                 {
-                    attack_mask |= (1ULL << (rank * 8 + file));
-                    if ((1ULL << (rank * 8 + file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (rank * 8 + file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+
                 for (rank = target_rank - 1, file = target_file - 1;
                      rank >= 0 && file >= 0;
                      rank--, file--)
                 {
-                    attack_mask |= (1ULL << (rank * 8 + file));
-                    if ((1ULL << (rank * 8 + file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (rank * 8 + file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
                 bishop_masks[square][magic_index] = attack_mask;
                 queen_masks[square][magic_index] |= attack_mask;
+
+
             }
             return;
         }
     case Rook:
         {
+            // Count of relevant blocker squares on rook’s ranks/files
             const int num_attacks = raw_rook_masks[square].CountBits();
+            // Precomputed bitboard mask of those relevant squares
             const Bitboard raw_rook_mask = raw_rook_masks[square];
-            // Changed this from an int to a Bitboard in typing, to avoid truncation
+            // Magic number (as 64‑bit) used to index into attack table without collisions
             const Bitboard magic_bitboard = Magic::ROOK_MAGIC_NUMBERS[square];
+            // Amount to shift right after multiplication to compress into table index
             const int magic_shift = 64 - Magic::ROOK_ATTACK_COUNT_MASK[square];
+        
+            // Iterate through all possible blocker configurations (2^num_attacks)
             for (int occupancy_index = 0; occupancy_index < (1 << num_attacks); occupancy_index++)
             {
-                attack_mask = 0ULL;
+                Bitboard attack_mask = 0ULL;
+        
+                // Expand the compact index into a full bitboard occupancy (masked to relevant bits)
                 Bitboard masked_occupancy = GetMaskedOccupancy(occupancy_index, raw_rook_mask, num_attacks);
-                const int magic_index = (masked_occupancy * magic_bitboard) >> (magic_shift);
+        
+                // Compute the magic index: multiply then shift
+                const int magic_index = (masked_occupancy * magic_bitboard) >> magic_shift;
+        
+                // Ray upward (north)
                 for (rank = target_rank + 1; rank < 8; rank++)
                 {
-                    attack_mask |= (1ULL << (rank * 8 + target_file));
-                    if ((1ULL << (rank * 8 + target_file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (rank * 8 + target_file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+                // Ray downward (south)
                 for (rank = target_rank - 1; rank >= 0; rank--)
                 {
-                    attack_mask |= (1ULL << (rank * 8 + target_file));
-                    if ((1ULL << (rank * 8 + target_file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (rank * 8 + target_file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+                // Ray right (east)
                 for (file = target_file + 1; file < 8; file++)
                 {
-                    attack_mask |= (1ULL << (target_rank * 8 + file));
-                    if ((1ULL << (target_rank * 8 + file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (target_rank * 8 + file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+                // Ray left (west)
                 for (file = target_file - 1; file >= 0; file--)
                 {
-                    attack_mask |= (1ULL << (target_rank * 8 + file));
-                    if ((1ULL << (target_rank * 8 + file)) & masked_occupancy)
-                        break;
+                    Bitboard square_bb = (1ULL << (target_rank * 8 + file));
+                    attack_mask |= square_bb;
+                    if (square_bb & masked_occupancy) break;
                 }
+        
+                // Store computed attack mask in rook lookup table
                 rook_masks[square][magic_index] = attack_mask;
+                // Also OR into queen table (queen moves include rook moves)
                 queen_masks[square][magic_index] |= attack_mask;
             }
+        
             return;
         }
     case King:
