@@ -26,41 +26,40 @@ int main()
     StackTrace::registerSignalHandler();
     AttackMask::initialize(); // Initialize attack masks
 
-
     Chessboard chessboard;
-    const Controller controller(chessboard);
-    controller.ParseFen(Fen::START_POSITION);
-
+    Controller controller(chessboard);
+    controller.ParseFen("kbK5/pp6/1P6/8/8/8/8/R7 w - - 0 1");
+    Log::PrintChessboard(chessboard);
+    Evaluator evaluator(Evaluator::SymmetricEvaluation);
+    SearchResult result = negamax(chessboard, 5, evaluator, 0);
+    Log::PrintMoveEncoding(result.best_move);
+    std::cout << "Score: " << result.evaluation << std::endl;
     // Log Chess Board
     // Log::PrintChessboard(chessboard);
-    // Log::PrintBitboard(chessboard.GetColorOccupancy(Chess::BOTH));
-
-    // Evaluator evaluator(Evaluator::SymmetricEvaluation);
-    // SearchResult result = negamax(chessboard, 6, evaluator, Chess::WHITE);
-    // Log::PrintMoveEncoding(result.best_move);
-    // std::cout << "Eval: " << result.evaluation << std::endl;
-    // Log::PrintMovesEncoding(MoveGen::GetMoves(chessboard, Chess::WHITE));
+    // const Bitboard occupancy = chessboard.GetColorOccupancy(Chess::BOTH);
+    // Log::PrintBitboard(occupancy);
     // Log Raw Attack Masks
     // for (int i = 0; i < 64; i++)
     // {
+    //     std::cout << "square: " << i << std::endl;
     //     Log::PrintBitboard(
     //         AttackMask::GetAttackMask(
-    //             AttackMask::RawRook, i));
+    //             AttackMask::BlackPawn, i));
     // }
 
     // Log Blocked Attack Masks
     // Log::PrintBitboard(
     //     AttackMask::GetAttackMask(
     //         AttackMask::Rook, Chess::a1, chessboard.GetColorOccupancy(Chess::BOTH)));
-    std::cout << Test::Perft(chessboard, 4) << std::endl;
-    //
-    // Log::PrintMoves(chessboard, 0);
 
+    // for (int square = 0; square < 64; square++)
+    // {
+    //     std::cout << "Queen attack mask for square " << square << " (" 
+    //               << Chess::SQUARE_TO_ALGEBRAIC_NOTATION[square] << "):" << std::endl;
+    //     Log::PrintBitboard(
+    //         AttackMask::GetAttackMask(AttackMask::Queen, square, occupancy)
+    //     );
+    //     std::cout << std::endl;
+    // }
 
-    // Evaluator evaluator(Evaluator::SymmetricEvaluation);
-    // SearchResult result = negamax(chessboard, 2, evaluator, Chess::BLACK);
-    // Log::PrintMoveEncoding(result.best_move);
-    // std::cout << "Eval: " << result.evaluation << std::endl;
-
-    return 0;
 }

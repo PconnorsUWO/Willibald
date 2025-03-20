@@ -14,6 +14,13 @@
 #include <cmath>
 #include <cassert>
 
+static Chessboard makeMove(const Chessboard& board, const Move& move, const int color)
+{
+    Chessboard new_board = board.Copy();
+    const Controller controller(new_board);
+    controller.MakeMove(move, color);
+    return new_board;
+}
 
 static double NormalizeEvaluation(double score)
 {
@@ -155,25 +162,20 @@ void Test::RunMoveGenTests()
 
 uint64_t Test::Perft(const Chessboard& board, int depth)
 {
-    if (depth == 0) return 1; // Count the current position
-    
+    if (depth == 0)
+        return 1; // Count the current position
+
     uint64_t nodes = 0;
-    std::vector<Move> moves = MoveGen::GetMoves(board, board.GetSideToMove());
-    
-    if (depth == 1) return moves.size(); // Optimization for depth 1
-    
+    std::vector<Move> moves = MoveGen::GetLegalMoves(board, board.GetSideToMove());
+
+    if (depth == 1)
+        return moves.size();
+
     for (const Move& move : moves)
     {
-        // Create a new board for each move
-        Chessboard new_board = board.Copy();
-        Controller controller(new_board);
-        
-        // Make the move on the new board
-        controller.MakeMove(move, board.GetSideToMove());
-        
-        // Recursively count nodes at the next depth
+        Chessboard new_board = makeMove(board, move, board.GetSideToMove());
         nodes += Perft(new_board, depth - 1);
     }
-    
+
     return nodes;
 }
