@@ -8,6 +8,7 @@
 
 void Log::PrintBitboard(const Bitboard bitboard) { bitboard.Print(); }
 
+//TODO: Fix
 void Log::PrintPieceOccupancy(const Chessboard& chessboard, int piece)
 {
     for (int rank = 0; rank < 8; rank++)
@@ -15,7 +16,7 @@ void Log::PrintPieceOccupancy(const Chessboard& chessboard, int piece)
         std::cout << 8 - rank << "   ";
         for (int file = 0; file < 8; file++)
         {
-            int square = rank * 8 + file;
+            const int square = rank * 8 + file;
             std::cout << (chessboard.GetPieceOccupancy(piece).Test(square) ? Chess::ASCII_PIECES[piece] : '.')
                 << ' ';
         }
@@ -25,7 +26,7 @@ void Log::PrintPieceOccupancy(const Chessboard& chessboard, int piece)
     std::cout << "\n decimal value = " << std::dec << chessboard.GetPieceOccupancy(piece) << '\n';
 }
 
-void Log::PrintChessboard(Chessboard chessboard)
+void Log::PrintChessboard(const Chessboard& chessboard)
 {
     for (int rank = 0; rank < 8; rank++)
     {
@@ -81,7 +82,7 @@ void Log::PrintMoves(const Chessboard& chessboard, const int color)
         {
             int square = rank * 8 + file;
             int target_square = -1;
-            for (const auto & move : moves)
+            for (const auto& move : moves)
             {
                 target_square = move.Decode(Move::TargetSquare);
                 if (square == target_square)
@@ -96,7 +97,32 @@ void Log::PrintMoves(const Chessboard& chessboard, const int color)
     std::cout << "\n    moves for: " << (color ? "black" : "white\n");
 }
 
-void Log::PrintMoveEncoding(Move move)
+void Log::PrintPieceMoves(const Chessboard& chessboard, const int piece, const int color)
+{
+    const std::vector<Move> moves = MoveGen::GetMoves(chessboard, color);
+    for (int rank = 0; rank < 8; rank++)
+    {
+        std::cout << 8 - rank << "   ";
+        for (int file = 0; file < 8; file++)
+        {
+            const int square = rank * 8 + file;
+            int target_square = -1;
+            for (const auto& move : moves)
+            {
+                target_square = move.Decode(Move::TargetSquare);
+                if (square == target_square)
+                    break;
+                target_square = -1;
+            }
+            std::cout << (target_square >= 0 ? 'x' : '.') << ' ';
+        }
+        std::cout << ('\n');
+    }
+    std::cout << "\n    a b c d e f g h\n";
+    std::cout << "\n    Moves For: " << Chess::PIECE_NAME[piece] << '\n';
+}
+
+void Log::PrintMoveEncoding(const Move& move)
 {
     int source_square = move.Decode(Move::SourceSquare);
     int target_square = move.Decode(Move::TargetSquare);

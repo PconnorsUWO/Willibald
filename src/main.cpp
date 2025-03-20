@@ -26,14 +26,37 @@ int main()
     StackTrace::registerSignalHandler();
     AttackMask::initialize(); // Initialize attack masks
 
+
     Chessboard chessboard;
     const Controller controller(chessboard);
-    controller.ParseFen(Fen::FEN_2);
-    Evaluator evaluator(Evaluator::SymmetricEvaluation);
-    SearchResult result = negamax(chessboard, 2, evaluator, Chess::BLACK);
+    controller.ParseFen(Fen::FEN_4);
 
-    Log::PrintMoveEncoding(result.best_move);
-    std::cout << "Eval: " << result.evaluation << std::endl;
+    // Log Chess Board
+    Log::PrintChessboard(chessboard);
+    Log::PrintBitboard(chessboard.GetColorOccupancy(Chess::BOTH));
+
+
+    // Log Raw Attack Masks
+    // for (int i = 0; i < 64; i++)
+    // {
+    //     Log::PrintBitboard(
+    //         AttackMask::GetAttackMask(
+    //             AttackMask::RawRook, i));
+    // }
+
+    // Log Blocked Attack Masks
+    Log::PrintBitboard(
+        AttackMask::GetAttackMask(
+            AttackMask::Rook, Chess::a1, chessboard.GetColorOccupancy(Chess::BOTH)));
+
+    //
+    // Log::PrintMoves(chessboard, 0);
+
+
+    // Evaluator evaluator(Evaluator::SymmetricEvaluation);
+    // SearchResult result = negamax(chessboard, 2, evaluator, Chess::BLACK);
+    // Log::PrintMoveEncoding(result.best_move);
+    // std::cout << "Eval: " << result.evaluation << std::endl;
 
     return 0;
 }

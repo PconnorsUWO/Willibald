@@ -39,7 +39,6 @@ private:
     static Bitboard raw_bishop_masks[64];
     static Bitboard raw_rook_masks[64];
     static void InitializeMask(Mask mask, int square);
-    static void InitializeSlideMask(Mask mask, int square);
-    static Bitboard GetMaskedOccupancy(int occupancy_index, Bitboard attack_mask);
+    static Bitboard GetMaskedOccupancy(int occupancy_index, Bitboard attack_mask, int num_attacks);
     AttackMask();
 };

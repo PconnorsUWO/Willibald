@@ -24,8 +24,8 @@ void Bitboard::Print() const
         std::cout << 8 - rank << "   ";
         for (int file = 0; file < 8; file++)
         {
-            int square = rank * 8 + file;
-            std::cout << Test(square) << ' ';
+            const int square = rank * 8 + file;
+            std::cout << (Test(square) ? 'x' : '.') << ' ';
         }
         std::cout << ('\n');
     }

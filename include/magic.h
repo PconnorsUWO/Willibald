@@ -30,7 +30,8 @@ namespace Magic
         12, 11, 11, 11, 11, 11, 11, 12
     };
 
-    const Bitboard ROOK_MAGIC_NUMBERS[64] = {
+    const Bitboard ROOK_MAGIC_NUMBERS[64] =
+    {
         0x8a80104000800020ULL,
         0x140002000100040ULL,
         0x2801880a0017001ULL,
@@ -96,7 +97,8 @@ namespace Magic
         0x2006104900a0804ULL,
         0x1004081002402ULL
     };
-    const Bitboard BISHOP_MAGIC_NUMBERS[64] = {
+    const Bitboard BISHOP_MAGIC_NUMBERS[64] =
+    {
         0x40040844404084ULL,
         0x2004208a004208ULL,
         0x10190041080202ULL,
