@@ -2,9 +2,9 @@
 // Created by Alexander King Perocho on 2025-03-18.
 //
 #include "../include/controller.h"
-
-#include <algorithm>
 #include "../include/chess.h"
+#include <algorithm>
+
 
 Controller::Controller(Chessboard& chessboard) : chessboard(chessboard)
 {
@@ -20,36 +20,63 @@ void Controller::MakeMove(const Move& move, const int color) const
     int is_double_pawn_push = move.Decode(Move::DoublePawnPushFlag);
     int is_castle = move.Decode(Move::CastleFlag);
     int is_enpassant = move.Decode(Move::EnpassantFlag);
-    if (is_capture)
-    {
-        chessboard.color_occupancies[color].Clear(source_square);
-        chessboard.piece_occupancies[piece].Clear(source_square);
-        chessboard.color_occupancies[color].Set(target_square);
+    
+    // Clear piece from source square and update color occupancy
+    chessboard.piece_occupancies[piece].Clear(source_square);
+    chessboard.color_occupancies[color].Clear(source_square);
+    
+    // Handle promotion (change piece type if promotion)
+    if (promotion_piece) {
+        // Use the color's version of the promotion piece
+        int actual_promotion_piece = color ? promotion_piece + 6 : promotion_piece;
+        chessboard.piece_occupancies[actual_promotion_piece].Set(target_square);
+    } else {
+        // Set the moved piece at target square
         chessboard.piece_occupancies[piece].Set(target_square);
-        int captured_piece = color ? Chess::P : Chess::p;
-        if (is_enpassant && chessboard.enpassant_square != Chess::NO_SQUARE)
-        {
-            /*
-                I don't know if redundancy exists:
-                In case of enpassant: target_square === chessboard.enpassant_square.
-                Also: chessboard.enpassant_square is not the square holding the captured pawn, it's the capturing_pawns intended destination.
-            */
-            chessboard.piece_occupancies[captured_piece].Clear(
-                color ? chessboard.enpassant_square - 8 : chessboard.enpassant_square + 8);
-            chessboard.color_occupancies[!color].Clear(
-                color ? chessboard.enpassant_square - 8 : chessboard.enpassant_square + 8);
-        }
-        else
-        {
-            int last_piece = captured_piece + 6;
-            while (captured_piece < last_piece)
-            {
-                chessboard.piece_occupancies[captured_piece].Clear(target_square);
-                captured_piece++;
+    }
+    
+    // Update color occupancy for target square
+    chessboard.color_occupancies[color].Set(target_square);
+    
+    // Handle capture
+    if (is_capture) {
+        if (is_enpassant && chessboard.enpassant_square != Chess::NO_SQUARE) {
+            int captured_pawn = color ? Chess::P : Chess::p;
+            int captured_square = color ? chessboard.enpassant_square - 8 : chessboard.enpassant_square + 8;
+            
+            chessboard.piece_occupancies[captured_pawn].Clear(captured_square);
+            chessboard.color_occupancies[!color].Clear(captured_square);
+            chessboard.color_occupancies[Chess::BOTH].Clear(captured_square);
+        } else {
+            // Clear all possible enemy pieces from target square
+            int captured_piece_start = color ? Chess::P : Chess::p;
+            int captured_piece_end = captured_piece_start + 6;
+            
+            for (int cp = captured_piece_start; cp < captured_piece_end; cp++) {
+                chessboard.piece_occupancies[cp].Clear(target_square);
             }
             chessboard.color_occupancies[!color].Clear(target_square);
         }
     }
+    
+    // Handle castling (move the rook as well)
+    if (is_castle) {
+        // TODO: Add castling logic
+    }
+    
+    // Update en passant square
+    if (is_double_pawn_push) {
+        chessboard.enpassant_square = color ? target_square - 8 : target_square + 8;
+    } else {
+        chessboard.enpassant_square = Chess::NO_SQUARE;
+    }
+    
+    // Update combined occupancy
+    chessboard.color_occupancies[Chess::BOTH] = 
+        chessboard.color_occupancies[Chess::WHITE] | chessboard.color_occupancies[Chess::BLACK];
+        
+    // Update side to move
+    chessboard.side_to_move = !color;
 }
 
 void Controller::ParseFen(const std::string& fen) const

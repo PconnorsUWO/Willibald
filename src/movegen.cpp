@@ -4,11 +4,13 @@
 #include "../include/movegen.h"
 #include "../include/attack_mask.h"
 #include "../include/chess.h"
-
+#include "../include/chessboard.h"
+#include "../include/controller.h"
+#include "../include/logging.h"
+#include <iostream>
 bool MoveGen::IsAttacked(const Chessboard& chessboard, const int square, const int color)
 {
-    const Bitboard pawn_attack_mask =
-        AttackMask::GetAttackMask(color ? AttackMask::BlackPawn : AttackMask::WhitePawn, square);
+    const Bitboard pawn_attack_mask = AttackMask::GetAttackMask(color ? AttackMask::BlackPawn : AttackMask::WhitePawn, square);
     const Bitboard knight_attack_mask = AttackMask::GetAttackMask(AttackMask::Knight, square);
     const Bitboard king_attack_mask = AttackMask::GetAttackMask(AttackMask::King, square);
     const Bitboard bishop_attack_mask = AttackMask::GetAttackMask(AttackMask::Bishop, square,
@@ -38,6 +40,31 @@ bool MoveGen::IsAttacked(const Chessboard& chessboard, const int square, const i
         return true;
     return false;
 }
+
+bool MoveGen::IsInCheck(const Chessboard& chessboard, const int color)
+{
+    const int king_piece = color ? Chess::k : Chess::K;
+    int king_square = chessboard.GetPieceOccupancy(king_piece).GetLsbIndex();
+    return IsAttacked(chessboard, king_square, !color);
+}
+
+std::vector<Move> MoveGen::GetLegalMoves(const Chessboard& chessboard, const int color)
+{
+    std::vector<Move> pseudo_legal_moves = GetMoves(chessboard, color);
+    std::vector<Move> legal_moves;
+    for (const Move& move : pseudo_legal_moves)
+    {
+        Chessboard temp_board = chessboard.Copy();
+        Controller temp_controller(temp_board);
+        temp_controller.MakeMove(move, color);
+        if (!IsInCheck(temp_board, color))
+        {
+            legal_moves.push_back(move);
+        }
+    }
+    return legal_moves;
+}
+
 
 std::vector<Move> MoveGen::GetPawnMoves(const Chessboard& chessboard, const int color)
 {

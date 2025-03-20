@@ -9,7 +9,10 @@
 class MoveGen
 {
 public:
+
+    static std::vector<Move> GetLegalMoves(const Chessboard& chessboard, const int color);
     static bool IsAttacked(const Chessboard& chessboard, int square, int color);
+    static bool IsInCheck(const Chessboard& chessboard, int color);
     static std::vector<Move> GetPawnMoves(const Chessboard& chessboard, int color);
     static std::vector<Move> GetKingMoves(Chessboard chessboard, int color);
     static std::vector<Move> GetKnightMoves(const Chessboard& chessboard, int color);
