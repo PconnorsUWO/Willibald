@@ -60,12 +60,20 @@ namespace StackTrace
         exit(EXIT_FAILURE);
     }
 
+    inline void signalHandler(int signum)
+    {
+        std::cerr << "Error: signal " << signum << std::endl;
+        printStackTrace();
+        exit(EXIT_FAILURE);
+    }
+    
     inline void registerSignalHandler()
     {
         _set_se_translator(seTranslator);
         signal(SIGSEGV, signalHandler);
     }
 }
+
 #else  // macOS/Linux
 
 #include <execinfo.h>

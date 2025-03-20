@@ -29,13 +29,17 @@ int main()
 
     Chessboard chessboard;
     const Controller controller(chessboard);
-    controller.ParseFen(Fen::FEN_4);
+    controller.ParseFen(Fen::START_POSITION);
 
     // Log Chess Board
-    Log::PrintChessboard(chessboard);
-    Log::PrintBitboard(chessboard.GetColorOccupancy(Chess::BOTH));
+    // Log::PrintChessboard(chessboard);
+    // Log::PrintBitboard(chessboard.GetColorOccupancy(Chess::BOTH));
 
-
+    // Evaluator evaluator(Evaluator::SymmetricEvaluation);
+    // SearchResult result = negamax(chessboard, 6, evaluator, Chess::WHITE);
+    // Log::PrintMoveEncoding(result.best_move);
+    // std::cout << "Eval: " << result.evaluation << std::endl;
+    // Log::PrintMovesEncoding(MoveGen::GetMoves(chessboard, Chess::WHITE));
     // Log Raw Attack Masks
     // for (int i = 0; i < 64; i++)
     // {
@@ -45,10 +49,10 @@ int main()
     // }
 
     // Log Blocked Attack Masks
-    Log::PrintBitboard(
-        AttackMask::GetAttackMask(
-            AttackMask::Rook, Chess::a1, chessboard.GetColorOccupancy(Chess::BOTH)));
-
+    // Log::PrintBitboard(
+    //     AttackMask::GetAttackMask(
+    //         AttackMask::Rook, Chess::a1, chessboard.GetColorOccupancy(Chess::BOTH)));
+    std::cout << Test::Perft(chessboard, 4) << std::endl;
     //
     // Log::PrintMoves(chessboard, 0);
 

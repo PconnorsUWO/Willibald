@@ -186,8 +186,9 @@ void AttackMask::InitializeMask(const Mask mask, const int square)
             {
                 attack_mask = 0ULL;
                 Bitboard masked_occupancy = GetMaskedOccupancy(occupancy_index, raw_bishop_mask, num_attacks);
-                const int magic_index = (masked_occupancy * magic_bitboard[square]) >> magic_shift;
-
+                // magic_bitboard is already the index, no need to index into it
+                const int magic_index = (masked_occupancy * magic_bitboard) >> magic_shift;
+                
                 for (rank = target_rank + 1, file = target_file + 1;
                      rank < 8 && file < 8;
                      rank++, file++)
@@ -229,7 +230,8 @@ void AttackMask::InitializeMask(const Mask mask, const int square)
         {
             const int num_attacks = raw_rook_masks[square].CountBits();
             const Bitboard raw_rook_mask = raw_rook_masks[square];
-            const int magic_bitboard = Magic::ROOK_MAGIC_NUMBERS[square];
+            // Changed this from an int to a Bitboard in typing, to avoid truncation
+            const Bitboard magic_bitboard = Magic::ROOK_MAGIC_NUMBERS[square];
             const int magic_shift = 64 - Magic::ROOK_ATTACK_COUNT_MASK[square];
             for (int occupancy_index = 0; occupancy_index < (1 << num_attacks); occupancy_index++)
             {

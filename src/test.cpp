@@ -152,3 +152,28 @@ void Test::RunMoveGenTests()
 
     std::cout << "MoveGen Tests completed." << std::endl;
 }
+
+uint64_t Test::Perft(const Chessboard& board, int depth)
+{
+    if (depth == 0) return 1; // Count the current position
+    
+    uint64_t nodes = 0;
+    std::vector<Move> moves = MoveGen::GetMoves(board, board.GetSideToMove());
+    
+    if (depth == 1) return moves.size(); // Optimization for depth 1
+    
+    for (const Move& move : moves)
+    {
+        // Create a new board for each move
+        Chessboard new_board = board.Copy();
+        Controller controller(new_board);
+        
+        // Make the move on the new board
+        controller.MakeMove(move, board.GetSideToMove());
+        
+        // Recursively count nodes at the next depth
+        nodes += Perft(new_board, depth - 1);
+    }
+    
+    return nodes;
+}
