@@ -40,6 +40,7 @@ Bitboard AttackMask::GetAttackMask(const Mask mask, const int square)
 // Function 'GetAttackMask' is within a recursive call chain
 Bitboard AttackMask::GetAttackMask(const Mask mask, const int square, Bitboard occupancy)
 {
+    uint64_t index;
     switch (mask)
     {
     case Bishop:
@@ -47,7 +48,8 @@ Bitboard AttackMask::GetAttackMask(const Mask mask, const int square, Bitboard o
             occupancy &= raw_bishop_masks[square];
             occupancy *= Magic::BISHOP_MAGIC_NUMBERS[square];
             occupancy >>= 64 - Magic::BISHOP_ATTACK_COUNT_MASK[square];
-            if (occupancy >= 4096) // Prevent out-of-bounds access
+            index = static_cast<uint64_t>(occupancy);
+            if (index >= 4096) // Prevent out-of-bounds access
                 return 0ULL;
             return bishop_masks[square][occupancy];
 
@@ -59,7 +61,8 @@ Bitboard AttackMask::GetAttackMask(const Mask mask, const int square, Bitboard o
             occupancy &= raw_rook_masks[square];
             occupancy *= Magic::ROOK_MAGIC_NUMBERS[square];
             occupancy >>= 64 - Magic::ROOK_ATTACK_COUNT_MASK[square];
-            if (occupancy >= 4096) // Prevent out-of-bounds access
+            index = static_cast<uint64_t>(occupancy);
+            if (index >= 4096) // Prevent out-of-bounds access
                 return 0ULL;
             return rook_masks[square][occupancy];
         }

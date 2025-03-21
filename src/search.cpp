@@ -26,7 +26,7 @@ inline int OpponentColor(int color) { return (color == Chess::WHITE) ? Chess::BL
 // Within Recursive call cahin.
 SearchResult negamax(const Chessboard& board, const int depth, Evaluator& evaluator, const int color)
 {
-    std::vector<Move> moves = MoveGen::GetMoves(board, color);
+    std::vector<Move> moves = MoveGen::GetLegalMoves(board, color);
 
     if (depth == 0 || moves.empty())
     {
